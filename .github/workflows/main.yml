@@ -26,13 +26,9 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-    - name: Read tag number
-      id: read_tag
-      run: echo ::set-output name=tag::$(($(cat version.txt)))
-
-    - name: Increment tag number
-      id: increment_tag
-      run: echo $((${{ steps.read_tag.outputs.tag }} + 1)) > version.txt
+    - name: Generate version number
+      id: version
+      run: echo "::set-output name=VERSION::$(date +'%Y%m%d%H%M%S')"
 
     - name: Build and push
       uses: docker/build-push-action@v3
@@ -40,7 +36,7 @@ jobs:
         context: ./frontend
         file: ./frontend/Dockerfile
         push: true
-        tags: tanatis/frontend:latest, tanatis/frontend:v${{ steps.read_tag.outputs.tag }}
+        tags: tanatis/frontend:${{ github.sha }}, tanatis/frontend:${{ steps.version.outputs.VERSION }}
 
   build-backend:
 
@@ -62,13 +58,9 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-    - name: Read tag number
-      id: read_tag
-      run: echo ::set-output name=tag::$(($(cat version.txt)))
-
-    - name: Increment tag number
-      id: increment_tag
-      run: echo $((${{ steps.read_tag.outputs.tag }} + 1)) > version.txt
+    - name: Generate version number
+      id: version
+      run: echo "::set-output name=VERSION::$(date +'%Y%m%d%H%M%S')"
 
     - name: Build and push
       uses: docker/build-push-action@v3
@@ -76,5 +68,4 @@ jobs:
         context: ./backend
         file: ./backend/Dockerfile
         push: true
-        tags: tanatis/backend:latest, tanatis/backend:v${{ steps.read_tag.outputs.tag }}
-      
+        tags: tanatis/backend:${{ github.sha }}, tanatis/backend:${{ steps.version.outputs.VERSION }}
